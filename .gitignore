@@ -90,3 +90,6 @@ ENV/
 
 # Spark temporary files
 metastore_db
+
+# Pytest Cache Files
+.pytest_cache/

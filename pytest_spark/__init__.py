@@ -76,9 +76,15 @@ def spark_context():
     (session scope).
     """
 
-    from pyspark import SparkContext
+    from pyspark import SparkContext, SparkConf
 
-    sc = SparkContext()
+    spark_jars = os.environ.get('PYTEST_SPARK_JARS')
+    if spark_jars:
+        spark_config = SparkConf()
+        spark_config.set("spark.jars", spark_jars)
+        sc = SparkContext(conf=spark_config)
+    else:
+        sc = SparkContext()
 
     logger = sc._jvm.org.apache.log4j
     logger.LogManager.getLogger("org").setLevel(logger.Level.OFF)
@@ -106,7 +112,11 @@ def spark_session():
             'a SQLContext or HiveContext from it in your tests.'
         )
 
-    spark_session = SparkSession.builder.enableHiveSupport().getOrCreate()
+    spark_jars = os.environ.get('PYTEST_SPARK_JARS')
+    if spark_jars:
+        spark_session = SparkSession.builder.enableHiveSupport().config("spark.jars", spark_jars).getOrCreate()
+    else:
+        spark_session = SparkSession.builder.enableHiveSupport().getOrCreate()
     sc = spark_session.sparkContext
 
     logger = sc._jvm.org.apache.log4j
