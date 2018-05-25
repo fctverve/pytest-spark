@@ -70,21 +70,44 @@ def pytest_report_header(config, startdir):
         return "spark version -- " + spark_ver
 
 
+def spark_configs():
+    configs = os.environ.get('PYTEST_SPARK_CONFIG')
+    if configs:
+        spark_configs = dict([config.split("=") for config in configs.split(" ")])
+    else:
+        spark_configs = {}
+    print("PYTEST_SPARK_CONFIGS = {}".format(configs))
+    return spark_configs
+
+
+def configure_spark_context():
+    from pyspark import SparkConf
+    config = SparkConf()
+
+    configs = spark_configs()
+    if configs:
+        for name, value in configs.items():
+            config.set(name, value)
+    return config
+
+
+def configure_spark_session(builder):
+    configs = spark_configs()
+    if configs:
+        for name, value in configs.items():
+            builder.config(name, value)
+    return builder
+
+
 @pytest.fixture(scope='session')
 def spark_context():
     """Return a SparkContext instance with reduced logging
     (session scope).
     """
 
-    from pyspark import SparkContext, SparkConf
+    from pyspark import SparkContext
 
-    spark_jars = os.environ.get('PYTEST_SPARK_JARS')
-    if spark_jars:
-        spark_config = SparkConf()
-        spark_config.set("spark.jars", spark_jars)
-        sc = SparkContext(conf=spark_config)
-    else:
-        sc = SparkContext()
+    sc = SparkContext(conf=configure_spark_context())
 
     logger = sc._jvm.org.apache.log4j
     logger.LogManager.getLogger("org").setLevel(logger.Level.OFF)
@@ -112,11 +135,7 @@ def spark_session():
             'a SQLContext or HiveContext from it in your tests.'
         )
 
-    spark_jars = os.environ.get('PYTEST_SPARK_JARS')
-    if spark_jars:
-        spark_session = SparkSession.builder.enableHiveSupport().config("spark.jars", spark_jars).getOrCreate()
-    else:
-        spark_session = SparkSession.builder.enableHiveSupport().getOrCreate()
+    spark_session = configure_spark_session(SparkSession.builder.enableHiveSupport()).getOrCreate()
     sc = spark_session.sparkContext
 
     logger = sc._jvm.org.apache.log4j
@@ -126,3 +145,4 @@ def spark_session():
     yield spark_session
 
     spark_session.stop()
+
