@@ -74,5 +74,18 @@ Example::
         test_df = spark_session.createDataFrame([[1,3],[2,4]], "a: int, b: int")
         # ...
 
+Customize spark configuration
+-----------------------------
+
+Set the configurations using the property names using the environment variable ``PYTEST_SPARK_CONFIG``.
+Each configuration is in the format <name>=<value>.
+Each configuration is separated from the others by a single space.
+
+Example::
+    Here we are adding the local JAR ``/tmp/my.jar`` and adding the ``nscala-time`` Scala wrapper for Joda time.
+    
+    export PYTEST_SPARK_CONFIG="spark.jars=/tmp/my.jar spark.jars.packages=com.github.nscala-time:nscala-time_2.11:2.18.0"
+    pytest tests/
+
 .. _pytest: http://pytest.org/
 .. _Apache Spark: https://spark.apache.org/
