@@ -82,8 +82,9 @@ Each configuration is in the format <name>=<value>.
 Each configuration is separated from the others by a single space.
 
 Example::
-    Here we are adding the local JAR ``/tmp/my.jar`` and adding the ``nscala-time`` Scala wrapper for Joda time.
-    
+
+    # Here we are adding the local JAR ``/tmp/my.jar`` and adding the ``nscala-time`` Scala wrapper for Joda time.
+
     export PYTEST_SPARK_CONFIG="spark.jars=/tmp/my.jar spark.jars.packages=com.github.nscala-time:nscala-time_2.11:2.18.0"
     pytest tests/
 
