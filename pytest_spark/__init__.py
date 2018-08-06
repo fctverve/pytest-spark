@@ -107,7 +107,7 @@ def spark_context():
 
     from pyspark import SparkContext
 
-    sc = SparkContext(conf=configure_spark_context())
+    sc = SparkContext.getOrCreate(conf=configure_spark_context())
 
     logger = sc._jvm.org.apache.log4j
     logger.LogManager.getLogger("org").setLevel(logger.Level.OFF)
@@ -145,4 +145,4 @@ def spark_session():
     yield spark_session
 
     spark_session.stop()
-
+    print('spark_session.stop() called')
